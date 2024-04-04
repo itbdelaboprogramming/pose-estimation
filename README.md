@@ -7,7 +7,7 @@ Installation
 1. Clone this repo to your Catkin workspace's src folder.
 2. Install the dependencies. Navigate to `install_requires` folder and run `noetic_dep.sh`.
 ```bash
-cd ~/catkin_ws/src/msd_pose_estimation/install_requires
+cd ~/catkin_ws/src/pose-estimation/install_requires
 sudo chmod +x noetic_dep.sh
 ./noetic_dep.sh
 ```
