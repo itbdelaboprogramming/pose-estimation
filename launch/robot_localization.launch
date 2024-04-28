@@ -1,8 +1,27 @@
 <launch>
-  <include file="$(find msd_pose_estimation)/launch/imu_filter.launch" />
+  <node pkg="rosserial_python" type="serial_node.py" name="serial_node" respawn="true" output="screen">
+    <param name="port" value="/dev/ttyUSB0"/>
+    <param name="baud" value="57600"/>
+  </node>
   
+  <arg name="model" default="$(find msd_pose_estimation)/urdf/irbot.urdf.xacro"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+
+  <include file="$(find msd_pose_estimation)/launch/imu_filter.launch" />
+
+
+  <arg name="rvizconfig" default="$(find msd_pose_estimation)/rviz/pose_estimation.rviz" />
+
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_local">
     <rosparam command="load" file="$(find msd_pose_estimation)/config/ekf_localization_config.yaml" />
     <remap from="/odometry/filtered" to="/odometry/filtered" />
   </node>
+
+  
+  <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    <param name="publish_frequency" type="double" value="50.0"/>
+    <param name="tf_prefix" value=""/>
+  </node>
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="true" />
 </launch>
