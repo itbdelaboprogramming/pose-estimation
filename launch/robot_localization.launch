@@ -11,6 +11,7 @@
 
 
   <arg name="rvizconfig" default="$(find msd_pose_estimation)/rviz/pose_estimation.rviz" />
+  <!-- <param name="map_frame"  value="$(arg set_map_frame)"/> -->
 
   <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_local">
     <rosparam command="load" file="$(find msd_pose_estimation)/config/ekf_localization_config.yaml" />

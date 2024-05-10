@@ -109,8 +109,8 @@ try:
         delta_left_angle = left_motor_pulse_delta/gear_ratio*2*np.pi
 
         # Calculate robot poses based on wheel odometry
-        pose_x = pose_x + wheel_radius/2.0 * (delta_right_angle + delta_left_angle) * np.sin(theta)
-        pose_y = pose_y + wheel_radius/2.0 * (delta_right_angle + delta_left_angle) * np.cos(theta)
+        pose_x = pose_x + wheel_radius/2.0 * (delta_right_angle + delta_left_angle) * np.cos(theta) / 100      # Convert to meter
+        pose_y = pose_y + wheel_radius/2.0 * (delta_right_angle + delta_left_angle) * np.sin(theta) / 100      # Convert to meter
         if not use_imu:
             theta = theta + (delta_right_angle - delta_left_angle) * wheel_radius/wheel_distance
             theta = warpAngle(theta)
