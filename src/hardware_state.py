@@ -105,14 +105,15 @@ try:
         mag_msg = MagneticField()
         imu_msg = Imu()
     
-        delta_right_angle = right_motor_pulse_delta/gear_ratio*2*np.pi
-        delta_left_angle = left_motor_pulse_delta/gear_ratio*2*np.pi
-
+        # Calculate each wheel angle in meters
+        delta_right_angle   = (2*np.pi * wheel_radius / 100 ) * (right_motor_pulse_delta / gear_ratio)
+        delta_left_angle    = (2*np.pi * wheel_radius / 100 ) * (left_motor_pulse_delta / gear_ratio)
+    
         # Calculate robot poses based on wheel odometry
-        pose_x = pose_x + wheel_radius/2.0 * (delta_right_angle + delta_left_angle) * np.cos(theta) / 100      # Convert to meter
-        pose_y = pose_y + wheel_radius/2.0 * (delta_right_angle + delta_left_angle) * np.sin(theta) / 100      # Convert to meter
+        pose_x = pose_x + (delta_right_angle + delta_left_angle) / 2 * np.cos(theta)        
+        pose_y = pose_y + (delta_right_angle + delta_left_angle) / 2 * np.sin(theta) 
         if not use_imu:
-            theta = theta + (delta_right_angle - delta_left_angle) * wheel_radius/wheel_distance
+            theta = theta + (delta_right_angle - delta_left_angle) / (wheel_distance/100) / 2
             theta = warpAngle(theta)
         else:
             theta = theta + gyr_z * compute_period / 1000.0

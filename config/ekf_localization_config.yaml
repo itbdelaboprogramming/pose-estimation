@@ -19,8 +19,8 @@ publish_tf: true
 odom0: /wheel/odom
 odom0_config: [true, true, false,
                false, false, true,
-               false, true, true,
-               false, false, false,
+               true, true, false,
+               false, false, true,
                false, false, false]
 odom0_queue_size: 10
 odom0_nodelay: true

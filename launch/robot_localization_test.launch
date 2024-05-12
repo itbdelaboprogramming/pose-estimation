@@ -1,0 +1,22 @@
+<launch>
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_local" clear_params="true">
+      <rosparam command="load" file="$(find msd_pose_estimation)/config/ekf_localization_config.yaml" />
+  
+     <!--  Placeholder for output topic remapping
+       You either remap on this node, the node that takes in the data, or both!
+       <remap from="odometry/filtered" to=""/>
+       <remap from="accel/filtered" to=""/>
+       -->
+  
+    </node>
+
+
+</launch>
+
+
+
+    <!-- <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization_local">
+        <rosparam command="load" file="$(find msd_pose_estimation)/config/ekf_localization_config.yaml" />
+        <remap from="/odometry/filtered" to="/odometry/filtered" />
+      </node> -->
+      
