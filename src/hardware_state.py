@@ -132,7 +132,9 @@ try:
         odom_msg.header.frame_id = "odom"
         odom_msg.child_frame_id = "base_footprint"
         odom_msg.pose.pose.position = Point(float(pose_x), float(pose_y), 0.0)
-        odom_msg.pose.pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(0.0, 0.0, theta))         
+        odom_msg.pose.pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(0.0, 0.0, theta))     
+        odom_msg.twist.twist.linear = Vector3(0.0, 0.0, 0.0)  
+        odom_msg.twist.twist.angular = Vector3(0.0, 0.0, 0.0)    
         odom_pub.publish(odom_msg)
         
         #Assign imu raw msg

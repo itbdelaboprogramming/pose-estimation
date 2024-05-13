@@ -8,6 +8,7 @@
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 
   <include file="$(find msd_pose_estimation)/launch/imu_filter.launch" />
+  <include file="$(find msd_pose_estimation)/launch/teleop.launch" />
 
 
   <arg name="rvizconfig" default="$(find msd_pose_estimation)/rviz/pose_estimation.rviz" />
