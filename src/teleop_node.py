@@ -20,7 +20,7 @@ def keys():
 
     while not rospy.is_shutdown():
         key_press   = getch.getch()
-        # key_cvt     = ord(getch.getch())
+        # key_press     = ord(getch.getch())
 
         if key_press == " ":
             right_motor_speed   = 0    
