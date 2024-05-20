@@ -134,7 +134,7 @@ try:
         odom_msg.pose.pose.position = Point(float(pose_x), float(pose_y), 0.0)
         odom_msg.pose.pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(0.0, 0.0, theta))     
         odom_msg.twist.twist.linear = Vector3(0.0, 0.0, 0.0)  
-        odom_msg.twist.twist.angular = Vector3(0.0, 0.0, 0.0)    
+        odom_msg.twist.twist.angular = Vector3(0.0, 0.0, (theta/(2*np.pi)*360))    
         odom_pub.publish(odom_msg)
         
         #Assign imu raw msg
