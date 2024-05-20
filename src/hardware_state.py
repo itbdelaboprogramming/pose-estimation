@@ -44,6 +44,9 @@ mag_y = 0.0
 mag_z = 0.0
 acc_filter = [0, 0, 0]
 gyr_filter = [0, 0, 0]
+sum_right = 0
+sum_left = 0
+theta_const = 2      # Unknown Variable (Adjustment purposes)
 
 # Main Loop Setup
 frequency = (1/compute_period) * 1000
@@ -98,6 +101,10 @@ def imu_filter_callback(msg: Imu):
     gyr_filter = [msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z]
 imu_filter_sub = rospy.Subscriber("imu/from_filter", Imu, imu_filter_callback)
 
+def rad_to_deg(angle):
+    angle_deg = angle * 360 / (2*np.pi)
+    return angle_deg
+
 try:
     while not rospy.is_shutdown():
         odom_msg = Odometry()
@@ -109,11 +116,14 @@ try:
         delta_right_angle   = (2*np.pi * wheel_radius / 100 ) * (right_motor_pulse_delta / gear_ratio)
         delta_left_angle    = (2*np.pi * wheel_radius / 100 ) * (left_motor_pulse_delta / gear_ratio)
     
+        sum_right   = sum_right + delta_right_angle
+        sum_left    = sum_left + delta_left_angle
+
         # Calculate robot poses based on wheel odometry
-        pose_x = pose_x + (delta_right_angle + delta_left_angle) / 2 * np.cos(theta)        
-        pose_y = pose_y + (delta_right_angle + delta_left_angle) / 2 * np.sin(theta) 
+        pose_x = pose_x + (delta_right_angle + delta_left_angle) / 2 * np.cos(theta)     
+        pose_y = pose_y + (delta_right_angle + delta_left_angle) / 2 * np.sin(theta)
         if not use_imu:
-            theta = theta + (delta_right_angle - delta_left_angle) / (wheel_distance/100) / 2
+            theta = theta + (delta_right_angle - delta_left_angle) / (2*wheel_distance/100) / theta_const
             theta = warpAngle(theta)
         else:
             theta = theta + gyr_z * compute_period / 1000.0
@@ -127,14 +137,18 @@ try:
         acc_filter = np.matmul(rotmax_filter, acc_filter_1)
         #print(az_offset)      
         
+        #Reset reading
+        right_motor_pulse_delta = 0
+        left_motor_pulse_delta = 0
+
         #Assign odometry msg
         odom_msg.header.stamp = rospy.Time.now() 
         odom_msg.header.frame_id = "odom"
         odom_msg.child_frame_id = "base_footprint"
         odom_msg.pose.pose.position = Point(float(pose_x), float(pose_y), 0.0)
         odom_msg.pose.pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(0.0, 0.0, theta))     
-        odom_msg.twist.twist.linear = Vector3(0.0, 0.0, 0.0)  
-        odom_msg.twist.twist.angular = Vector3(0.0, 0.0, (theta/(2*np.pi)*360))    
+        odom_msg.twist.twist.linear = Vector3(float(sum_right), float(sum_left), 0.0)  
+        odom_msg.twist.twist.angular = Vector3(theta, 0.0, rad_to_deg(theta))    
         odom_pub.publish(odom_msg)
         
         #Assign imu raw msg
@@ -159,6 +173,7 @@ try:
         imu_msg.linear_acceleration = Vector3(acc_filter[1], acc_filter[0], acc_filter[2])
         imu_pub.publish(imu_msg)
         rate.sleep()
+        
         
 except BaseException as e:
     print(e)
