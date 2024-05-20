@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import rospy  
 from ros_msd700_msgs.msg import HardwareCommand
@@ -35,13 +35,21 @@ def keys():
                 left_motor_speed    = -100  
         
             elif key_press == "d":
-                right_motor_speed   = 100
-                left_motor_speed    = 0
-        
-            elif key_press == "a":
                 right_motor_speed   = 0
                 left_motor_speed    = 100
         
+            elif key_press == "a":
+                right_motor_speed   = 100
+                left_motor_speed    = 0
+
+            elif key_press == "q":
+                right_motor_speed   = 100
+                left_motor_speed    = -100
+        
+            elif key_press == "e":
+                right_motor_speed   = -100
+                left_motor_speed    = 100
+
             else :
                 right_motor_speed   = 0
                 left_motor_speed    = 0

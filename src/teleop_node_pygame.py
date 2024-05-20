@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import pygame as py
 import sys
@@ -34,7 +34,7 @@ def get_keypressed():
         # Check each defined key and update key_pressed if any is pressed
         if keys[py.K_a]:
             right_motor_speed   = 100    
-            left_motor_speed    = 0
+            left_motor_speed    = -100
             print("W")
             key_pressed = py.K_a
         elif keys[py.K_s]:
@@ -43,7 +43,7 @@ def get_keypressed():
             print("A")
             key_pressed = py.K_s
         elif keys[py.K_d]:
-            right_motor_speed   = 0    
+            right_motor_speed   = -100    
             left_motor_speed    = 100
             print("S")
             key_pressed = py.K_d
