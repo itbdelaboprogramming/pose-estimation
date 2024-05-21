@@ -123,7 +123,7 @@ try:
         pose_x = pose_x + (delta_right_angle + delta_left_angle) / 2 * np.cos(theta)     
         pose_y = pose_y + (delta_right_angle + delta_left_angle) / 2 * np.sin(theta)
         if not use_imu:
-            theta = theta + (delta_right_angle - delta_left_angle) / (2*wheel_distance/100) / theta_const
+            theta = theta + (delta_left_angle - delta_right_angle) / (2*wheel_distance/100) / theta_const
             theta = warpAngle(theta)
         else:
             theta = theta + gyr_z * compute_period / 1000.0

@@ -84,9 +84,10 @@ def setup_publisher():
 
 if __name__ == '__main__':
     try:
-        while(1):
-        # while not rospy.is_shutdown():
+        # while(1):
+        while not rospy.is_shutdown():
             get_keypressed()
             # setup_publisher()
     except rospy.ROSInterruptException:
+        rospy.quit()
         pass
