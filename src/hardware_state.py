@@ -23,6 +23,7 @@ use_imu = rospy.get_param("/raw_sensor/use_imu", 0)
 az_offset = rospy.get_param("/raw_sensor/az_offset", 0.31)
 
 # Global Variables
+sub_count = 0
 right_motor_pulse_delta = 0
 left_motor_pulse_delta = 0
 vx = 0.0
@@ -33,7 +34,7 @@ theta = 0.0
 roll, roll_filter = 0.0, 0.0
 pitch, pitch_filter = 0.0, 0.0
 yaw, yaw_filter = 0.0, 0.0
-accum_yaw, last_yaw, delta_yaw = 0.0, 0.0, 0.0
+accum_yaw, curr_yaw, last_yaw, delta_yaw = 0.0, 0.0, 0.0, 0.0
 acc_x = 0.0
 acc_y = 0.0
 acc_z = 0.0
@@ -86,13 +87,21 @@ def rotm_from_eul(r, p, y):
         
 def hardware_state_callback(msg: HardwareState):
     global right_motor_pulse_delta, left_motor_pulse_delta, roll, pitch, yaw, acc_x, acc_y, acc_z, \
-    gyr_x, gyr_y, gyr_z, mag_x, mag_y, mag_z, az_offset
+    gyr_x, gyr_y, gyr_z, mag_x, mag_y, mag_z, az_offset, sub_count, accum_yaw, curr_yaw, last_yaw, delta_yaw
     right_motor_pulse_delta = msg.right_motor_pulse_delta
     left_motor_pulse_delta = msg.left_motor_pulse_delta
     roll, pitch, yaw = np.radians(msg.roll), np.radians(msg.pitch), warpAngle(np.radians(msg.heading)+np.pi/2)
     acc_x, acc_y, acc_z = msg.acc_x, msg.acc_y, msg.acc_z+az_offset
     gyr_x, gyr_y, gyr_z = np.radians(msg.gyr_y), np.radians(msg.gyr_x), -np.radians(msg.gyr_z)
     mag_x, mag_y, mag_z = msg.mag_x/1000000.0, msg.mag_y/1000000.0, msg.mag_z/1000000.0
+    sub_count       += 1
+    # Calculate delta yaw
+    if sub_count <= 1:
+        last_yaw    = yaw
+    else:
+        delta_yaw   = yaw - last_yaw
+        last_yaw    = yaw
+    accum_yaw       -= delta_yaw
 hardware_state_sub = rospy.Subscriber("hardware_state", HardwareState, hardware_state_callback)
 
 def imu_filter_callback(msg: Imu):
@@ -134,31 +143,23 @@ try:
         acc_filter_1    = np.array([[acc_x], [acc_y], [acc_z]])
         rotmax_filter   = rotm_from_eul(roll_filter, pitch_filter, 0.0)
         acc_filter      = np.matmul(rotmax_filter, acc_filter_1)
-
-        delta_yaw       = yaw - last_yaw
-        accum_yaw   += delta_yaw
-        last_yaw    = yaw
-        
-
-
+             
         # Reset reading
         right_motor_pulse_delta = 0
         left_motor_pulse_delta = 0
-        # gyr_filter[0] = 0
-        # gyr_filter[1] = 0
-        # gyr_filter[2] = 0
-        # acc_filter[0] = 0
-        # acc_filter[1] = 0
-        # acc_filter[2] = 0
+        last_yaw    = yaw 
 
         #Assign odometry msg
         odom_msg.header.stamp = rospy.Time.now() 
         odom_msg.header.frame_id = "odom"
         odom_msg.child_frame_id = "base_footprint"
         odom_msg.pose.pose.position = Point(float(pose_x), float(pose_y), 0.0)
-        odom_msg.pose.pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(0.0, 0.0, theta))     
-        odom_msg.twist.twist.linear = Vector3(yaw, 0.0, rad_to_deg(yaw))  
-        odom_msg.twist.twist.angular = Vector3(theta, 0.0, rad_to_deg(theta))    
+        odom_msg.pose.pose.orientation  = Quaternion(*tf.transformations.quaternion_from_euler(0.0, 0.0, theta))    
+        odom_msg.twist.twist.linear     = Vector3(0.0, 0.0, 0.0)  
+        odom_msg.twist.twist.angular    = Vector3(0.0, 0.0, 0.0)   
+        # minjem msg buat debug
+        # odom_msg.twist.twist.linear     = Vector3(rad_to_deg(yaw), rad_to_deg(last_yaw), delta_yaw)  
+        # odom_msg.twist.twist.angular    = Vector3(theta, rad_to_deg(warpAngle(accum_yaw)), rad_to_deg(theta))    
         odom_pub.publish(odom_msg)
         
         #Assign imu raw msg
@@ -178,7 +179,7 @@ try:
         #Assign imu msg    
         imu_msg.header.stamp = rospy.Time.now()
         imu_msg.header.frame_id = "imu"
-        imu_msg.orientation = Quaternion(*tf.transformations.quaternion_from_euler(roll_filter, pitch_filter, yaw))
+        imu_msg.orientation = Quaternion(*tf.transformations.quaternion_from_euler(roll_filter, pitch_filter, accum_yaw))
         imu_msg.angular_velocity = Vector3(gyr_filter[0], gyr_filter[1], gyr_filter[2])
         imu_msg.linear_acceleration = Vector3(acc_filter[1], acc_filter[0], acc_filter[2])
         imu_pub.publish(imu_msg)
