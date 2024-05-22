@@ -33,6 +33,7 @@ theta = 0.0
 roll, roll_filter = 0.0, 0.0
 pitch, pitch_filter = 0.0, 0.0
 yaw, yaw_filter = 0.0, 0.0
+accum_yaw, last_yaw, delta_yaw = 0.0, 0.0, 0.0
 acc_x = 0.0
 acc_y = 0.0
 acc_z = 0.0
@@ -128,16 +129,19 @@ try:
         else:
             theta = theta + gyr_z * compute_period / 1000.0
             theta = warpAngle(theta)
-            
-        #print(math.degrees(roll), math.degrees(pitch), math.degrees(yaw))
         
-        acc_filter_1 = np.array([[acc_x], [acc_y], [acc_z]])
-        rotmax_filter = rotm_from_eul(roll_filter, pitch_filter, 0.0)
+        # Calculate orientation based on IMU
+        acc_filter_1    = np.array([[acc_x], [acc_y], [acc_z]])
+        rotmax_filter   = rotm_from_eul(roll_filter, pitch_filter, 0.0)
+        acc_filter      = np.matmul(rotmax_filter, acc_filter_1)
+
+        delta_yaw       = yaw - last_yaw
+        accum_yaw   += delta_yaw
+        last_yaw    = yaw
         
-        acc_filter = np.matmul(rotmax_filter, acc_filter_1)
-        #print(az_offset)      
-        
-        #Reset reading
+
+
+        # Reset reading
         right_motor_pulse_delta = 0
         left_motor_pulse_delta = 0
         # gyr_filter[0] = 0
@@ -153,7 +157,7 @@ try:
         odom_msg.child_frame_id = "base_footprint"
         odom_msg.pose.pose.position = Point(float(pose_x), float(pose_y), 0.0)
         odom_msg.pose.pose.orientation = Quaternion(*tf.transformations.quaternion_from_euler(0.0, 0.0, theta))     
-        odom_msg.twist.twist.linear = Vector3(float(sum_right), float(sum_left), 0.0)  
+        odom_msg.twist.twist.linear = Vector3(yaw, 0.0, rad_to_deg(yaw))  
         odom_msg.twist.twist.angular = Vector3(theta, 0.0, rad_to_deg(theta))    
         odom_pub.publish(odom_msg)
         
