@@ -46,7 +46,7 @@ acc_filter = [0, 0, 0]
 gyr_filter = [0, 0, 0]
 sum_right = 0
 sum_left = 0
-theta_const = 2      # Unknown Variable (Adjustment purposes)
+theta_const = 0.5666512816      # Unknown Variable (Adjustment purposes)
 
 # Main Loop Setup
 frequency = (1/compute_period) * 1000
@@ -123,7 +123,7 @@ try:
         pose_x = pose_x + (delta_right_angle + delta_left_angle) / 2 * np.cos(theta)     
         pose_y = pose_y + (delta_right_angle + delta_left_angle) / 2 * np.sin(theta)
         if not use_imu:
-            theta = theta + (delta_left_angle - delta_right_angle) / (2*wheel_distance/100) / theta_const
+            theta = theta + (delta_right_angle - delta_left_angle) / (2*wheel_distance/100)  * theta_const
             theta = warpAngle(theta)
         else:
             theta = theta + gyr_z * compute_period / 1000.0
@@ -140,6 +140,12 @@ try:
         #Reset reading
         right_motor_pulse_delta = 0
         left_motor_pulse_delta = 0
+        # gyr_filter[0] = 0
+        # gyr_filter[1] = 0
+        # gyr_filter[2] = 0
+        # acc_filter[0] = 0
+        # acc_filter[1] = 0
+        # acc_filter[2] = 0
 
         #Assign odometry msg
         odom_msg.header.stamp = rospy.Time.now() 
