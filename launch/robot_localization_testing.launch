@@ -13,5 +13,5 @@
     <param name="tf_prefix" value=""/>
   </node>
 
-  <!-- <include file="$(find msd_pose_estimation)/launch/rviz_launch.launch" /> -->
+  <include file="$(find msd_pose_estimation)/launch/rviz_launch.launch" />
 </launch>
