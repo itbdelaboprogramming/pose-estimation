@@ -35,27 +35,27 @@ def get_keypressed():
         if keys[py.K_a]:
             right_motor_speed   = 100    
             left_motor_speed    = -100
-            print("W")
+            # print("W")
             key_pressed = py.K_a
         elif keys[py.K_s]:
             right_motor_speed   = -100    
             left_motor_speed    = -100
-            print("A")
+            # print("A")
             key_pressed = py.K_s
         elif keys[py.K_d]:
             right_motor_speed   = -100    
             left_motor_speed    = 100
-            print("S")
+            # print("S")
             key_pressed = py.K_d
         elif keys[py.K_w]:
             right_motor_speed   = 100    
             left_motor_speed    = 100
-            print("D")
+            # print("D")
             key_pressed = py.K_w
         else:
             right_motor_speed   = 0    
             left_motor_speed    = 0
-            print("NOTHING")
+            # print("NOTHING")
 
 
         py.display.update()

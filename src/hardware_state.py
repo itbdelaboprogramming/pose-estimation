@@ -19,7 +19,7 @@ max_speed_angular = rospy.get_param("/raw_sensor/max_speed_angular", 1.75)
 wheel_radius = rospy.get_param("/raw_sensor/wheel_radius", 2.75)	  # in cm
 wheel_distance = rospy.get_param("/raw_sensor/wheel_distance", 23.0)    # in cm
 gear_ratio = rospy.get_param("/raw_sensor/gear_ratio", 1980.0)
-use_imu = rospy.get_param("/raw_sensor/use_imu", 0)
+use_imu = rospy.get_param("/raw_sensor/use_imu", 1)
 az_offset = rospy.get_param("/raw_sensor/az_offset", 0.31)
 
 # Global Variables
@@ -90,9 +90,9 @@ def hardware_state_callback(msg: HardwareState):
     gyr_x, gyr_y, gyr_z, mag_x, mag_y, mag_z, az_offset, sub_count, accum_yaw, curr_yaw, last_yaw, delta_yaw
     right_motor_pulse_delta = msg.right_motor_pulse_delta
     left_motor_pulse_delta = msg.left_motor_pulse_delta
-    roll, pitch, yaw = np.radians(msg.roll), np.radians(msg.pitch), warpAngle(np.radians(msg.heading)+np.pi/2)
+    roll, pitch, yaw = np.radians(msg.roll), np.radians(msg.pitch), -warpAngle(np.radians(msg.heading)+np.pi/2)
     acc_x, acc_y, acc_z = msg.acc_x, msg.acc_y, msg.acc_z+az_offset
-    gyr_x, gyr_y, gyr_z = np.radians(msg.gyr_y), np.radians(msg.gyr_x), -np.radians(msg.gyr_z)
+    gyr_x, gyr_y, gyr_z = np.radians(msg.gyr_y), np.radians(msg.gyr_x), np.radians(msg.gyr_z)
     mag_x, mag_y, mag_z = msg.mag_x/1000000.0, msg.mag_y/1000000.0, msg.mag_z/1000000.0
     sub_count       += 1
     # Calculate delta yaw
@@ -101,7 +101,7 @@ def hardware_state_callback(msg: HardwareState):
     else:
         delta_yaw   = yaw - last_yaw
         last_yaw    = yaw
-    accum_yaw       -= delta_yaw
+    accum_yaw       += delta_yaw
 hardware_state_sub = rospy.Subscriber("hardware_state", HardwareState, hardware_state_callback)
 
 def imu_filter_callback(msg: Imu):
@@ -136,8 +136,11 @@ try:
             theta = theta + (delta_right_angle - delta_left_angle) / (2*wheel_distance/100)  * theta_const
             theta = warpAngle(theta)
         else:
-            theta = theta + gyr_z * compute_period / 1000.0
-            theta = warpAngle(theta)
+            # theta = theta + (gyr_z * compute_period / 1000.0 + accum_yaw)/2
+            # theta = theta + gyr_z * compute_period / 1000.0
+            # theta = warpAngle(theta)
+            theta = accum_yaw
+            print(theta)
         
         # Calculate orientation based on IMU
         acc_filter_1    = np.array([[acc_x], [acc_y], [acc_z]])
