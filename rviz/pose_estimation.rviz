@@ -10,7 +10,6 @@ Panels:
         - /Odometry_filtered1/Shape1
         - /Wheel_odometry1
         - /Wheel_odometry1/Shape1
-        - /Imu1
       Splitter Ratio: 0.5
     Tree Height: 725
   - Class: rviz/Selection
@@ -169,16 +168,6 @@ Visualization Manager:
       Reference Frame: <Fixed Frame>
       Show Trail: false
       Value: true
-    - Alpha: 0.5
-      Class: rviz_plugin_tutorials/Imu
-      Color: 204; 51; 204
-      Enabled: false
-      History Length: 1
-      Name: Imu
-      Queue Size: 10
-      Topic: /imu/data
-      Unreliable: false
-      Value: false
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

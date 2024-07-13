@@ -140,7 +140,7 @@ try:
             # theta = theta + gyr_z * compute_period / 1000.0
             # theta = warpAngle(theta)
             theta = accum_yaw
-            print(theta)
+            # print(theta)
         
         # Calculate orientation based on IMU
         acc_filter_1    = np.array([[acc_x], [acc_y], [acc_z]])
